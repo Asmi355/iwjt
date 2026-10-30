@@ -428,6 +428,7 @@ function showDiyaMoment() {
                 src="images/two-diyas.jpg"
                 alt="Two diyas glowing in a dark corner"
                 class="diya-photo"
+                decoding="async"
             >
 
             <div class="diya-thought">
@@ -447,9 +448,7 @@ function showDiyaMoment() {
 
                 <p>(And here I am, minding the diyas' business.)</p>
 
-                <button class="diya-next" onclick="showAbsurdLaw()">
-                 Next page →
-                </button>
+                <button class="diya-next" style="margin-bottom: -5px;" onclick="showAbsurdLaw()"> Next Page</button>
             </div>
 
         </div>
@@ -683,6 +682,9 @@ function showFineGirlFinale() {
             <p>She'd just told the truth about a foot.</p>
 
             <h3>And honestly, that was enough for one Tuesday.</h3>
+            <button class="diya-next" style="margin-bottom: 25px;" onclick="showYouMadeMeForget()">
+             Next page →
+            </button>
         </div>
     `;
 }
@@ -697,6 +699,48 @@ function showStoryTransition() {
             <h2>As you make a law, there's a story waiting for you.</h2>
 
             <button onclick="showFineGirlStory()">Turn the page →</button>
+        </div>
+    `;
+}
+
+function showYouMadeMeForget() {
+    const page = document.getElementById("firstpage");
+
+    page.innerHTML = `
+        <div class="page-content story-page forget-page">
+            <p class="page-label forget-label">A THOUGHT, INTERRUPTED.</p>
+
+            <h3 class="story-title">You Made Me Forget.</h3>
+
+            <p>You remember something. Something AMAZING.</p>
+
+            <p>A thought so good that you mentally congratulate yourself for having it.</p>
+
+            <p><em>Oh, this is actually worth sharing.</em></p>
+
+            <p>And then someone starts talking.</p>
+
+            <p>You listen. You respond. You get involved.</p>
+
+            <p>And suddenly...</p>
+
+            <h3>IT'S GONE.</h3>
+
+            <p>You stare into the void, trying to retrieve it.</p>
+
+            <p>And somehow, you've decided this is the other person's fault.</p>
+
+            <p><em>If you hadn't started talking, I'd have said something brilliant by now.</em></p>
+
+            <p>Meanwhile, they're just standing there, existing.</p>
+
+            <p><em>Perhaps the thought wasn't that important.</em></p>
+
+            <p><em>Perhaps it was.</em></p>
+
+            <p><em>We'll never know.</em></p>
+
+            <h3>Anyway, what were we talking about?</h3>
         </div>
     `;
 }

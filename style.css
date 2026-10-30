@@ -400,6 +400,38 @@ button:hover {
     margin-top: 34px;
 } 
 
+/* Only for "You Made Me Forget" */
+
+/* Desktop: slightly smaller text */
+@media (min-width: 769px) {
+    .forget-page {
+        font-size: 12px;
+    }
+}
+
+
+/* Move the label up on desktop */
+.forget-label {
+    position: relative;
+    top: 4px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .forget-page {
+        transform: translateY(-14px);
+    }
+
+    .forget-label {
+        top: -6px;
+        transform: none;
+    }
+
+    .forget-title {
+        margin-top: 0;
+    }
+}
+
 @media (max-width: 600px) {
     .book {
         width: calc(100vw - 32px);
@@ -455,5 +487,15 @@ button:hover {
        font-size: 22px;
        line-height: 1.2;
        margin-bottom: 12px;
+    }
+
+    .book-scene {
+        min-height: 100dvh;
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    body {
+        overflow: hidden;
     }
 }
