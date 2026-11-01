@@ -499,3 +499,21 @@ button:hover {
         overflow: hidden;
     }
 }
+
+/* Keep the poem readable on mobile */
+@media (max-width: 600px) {
+    .things-page {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .things-page p {
+        font-size: 12px;
+        line-height: 1.4;
+        margin: 7px 0;
+    }
+
+    .things-page .diya-next {
+        margin-top: 12px;
+    }
+}

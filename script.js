@@ -741,6 +741,90 @@ function showYouMadeMeForget() {
             <p><em>We'll never know.</em></p>
 
             <h3>Anyway, what were we talking about?</h3>
+
+            <button class="diya-next" style="margin-bottom: 25px;" onclick="showThingsWeCallThings()">
+                Next page →
+            </button>
+        </div>
+    `;
+}
+
+function showThingsWeCallThings() {
+    const page = document.getElementById("firstpage");
+
+    page.innerHTML = `
+        <div class="page-content story-page things-page">
+            <p class="page-label">A LITTLE OBSERVATION.</p>
+
+            <h3 class="story-title">The Things We Call Things</h3>
+
+            <p>We're so quick to name things.</p>
+
+            <p>
+                A little kindness becomes sympathy.<br>
+                A little distance becomes indifference.<br>
+                A little silence becomes ignorance.
+            </p>
+
+            <p>
+                And just like that,<br>
+                we've made sense of everything.
+            </p>
+
+            <p>How convenient.</p>
+
+            <p>
+                We no longer have to wonder<br>
+                what someone meant,<br>
+                what someone felt,<br>
+                or what we might have missed.
+            </p>
+
+            <p>We have a word for it now.</p>
+
+            <p>
+                And words are wonderful things.<br>
+                They help us understand each other.
+            </p>
+
+            <button class="diya-next" style="margin-bottom: 25px;" onclick="showThingsWeCallThingsPartTwo()">
+                Turn the page →
+            </button>
+        </div>
+    `;
+}
+
+function showThingsWeCallThingsPartTwo() {
+    const page = document.getElementById("firstpage");
+
+    page.innerHTML = `
+        <div class="page-content story-page things-page">
+            <p class="page-label">AND THEN...</p>
+
+            <p>
+                Until we start using them<br>
+                to stop understanding each other.
+            </p>
+
+            <p>
+                Because sometimes,<br>
+                a label is just a question<br>
+                we got tired of asking.
+            </p>
+
+            <p>
+                And sometimes,<br>
+                the thing we thought we understood<br>
+                was a person<br>
+                we never really tried to.
+            </p>
+
+            <p>We gave it a name.</p>
+
+            <p>
+                And somehow, that felt<br>
+                like knowing it.
+            </p>
         </div>
     `;
 }
