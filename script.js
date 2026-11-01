@@ -742,8 +742,8 @@ function showYouMadeMeForget() {
 
             <h3>Anyway, what were we talking about?</h3>
 
-            <button class="diya-next" style="margin-bottom: 25px;" onclick="showThingsWeCallThings()">
-                Next page →
+            <button class="diya-next" style="margin-bottom: 25px;" onclick="showThingsWeCallThings">
+                Turn the page →
             </button>
         </div>
     `;
