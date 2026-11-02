@@ -506,7 +506,7 @@ function showDiyaMoment() {
 
                 <p>(And here I am, minding the diyas' business.)</p>
 
-                <button class="diya-next" style="margin-bottom: 15px;" onclick="showAbsurdLaw()"> Next Page</button>
+                <button class="diya-next" style="margin-bottom: 15px;" onclick="showAbsurdLaw()"> >> </button>
             </div>
 
         </div>
@@ -800,8 +800,8 @@ function showYouMadeMeForget() {
 
             <h3>Anyway, what were we talking about?</h3>
 
-            <button class="diya-next" style="margin-bottom: 8px;" onclick="showThingsWeCallThings()">
-                Next page →
+            <button class="diya-next" style="margin-bottom: 15px;" onclick="showThingsWeCallThings()">
+                >>
             </button>
             
         </div>
