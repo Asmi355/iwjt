@@ -34,6 +34,40 @@ function goToPreviousPage() {
     addPreviousButton();
 }
 
+//continuity progress
+
+const readingKey = "iwjt-reading-progress";
+
+function saveReadingProgress() {
+    const page = document.getElementById("firstpage");
+    const snapshot = page.cloneNode(true);
+
+    const previous = snapshot.querySelector("#previousPage");
+    if (previous) previous.remove();
+
+    snapshot.querySelectorAll("textarea").forEach((field, i) => {
+        field.textContent = page.querySelectorAll("textarea")[i]?.value || "";
+    });
+
+    snapshot.querySelectorAll("input").forEach((field, i) => {
+        field.setAttribute(
+            "value",
+            page.querySelectorAll("input")[i]?.value || ""
+        );
+    });
+
+    localStorage.setItem(readingKey, JSON.stringify({
+        pageHTML: snapshot.innerHTML,
+        history: pageHistory
+    }));
+}
+
+function clearReadingProgress() {
+    localStorage.removeItem(readingKey);
+    pageHistory.length = 0;
+}
+
+
 // Save the page before its buttons change it.
 document.addEventListener("click", function (event) {
     const page = document.getElementById("firstpage");
@@ -68,16 +102,39 @@ document.addEventListener("click", function (event) {
 // Show Previous whenever a new page appears.
 const pageObserver = new MutationObserver(() => {
     addPreviousButton();
+
+    if (document.getElementById("book").classList.contains("is-open")) {
+        saveReadingProgress();
+    }
 });
 
 pageObserver.observe(document.getElementById("firstpage"), {
     childList: true
 });
 
+
 function entertheworld() {
     const book = document.getElementById("book");
     const cover = document.getElementById("bookCover");
     const page = document.getElementById("firstpage");
+
+    const saved = localStorage.getItem(readingKey);
+
+    if (saved) {
+        const resume = confirm(
+            "Welcome back! Would you like to continue where you left off?\n\nOK = Continue reading\nCancel = Start from the beginning"
+        );
+
+        if (resume) {
+            const progress = JSON.parse(saved);
+            page.innerHTML = progress.pageHTML;
+            pageHistory.length = 0;
+            pageHistory.push(...progress.history);
+        } else {
+            clearReadingProgress();
+            page.innerHTML = originalPage;
+        }
+    }
 
     book.classList.add("is-open");
     cover.style.transform = "rotateY(-160deg)";
@@ -88,6 +145,7 @@ function entertheworld() {
         page.style.pointerEvents = "auto";
     }, 1500);
 }
+
 
 function goBack() {
     const book = document.getElementById("book");
@@ -448,7 +506,7 @@ function showDiyaMoment() {
 
                 <p>(And here I am, minding the diyas' business.)</p>
 
-                <button class="diya-next" style="margin-bottom: -5px;" onclick="showAbsurdLaw()"> Next Page</button>
+                <button class="diya-next" style="margin-bottom: 15px;" onclick="showAbsurdLaw()"> Next Page</button>
             </div>
 
         </div>
@@ -548,12 +606,12 @@ function showLawPass() {
 
             <p><em>And you chose peace.</em></p>
 
-            <button onclick="showStoryTransition()">Moving on →</button>
+            <button onclick="showStoryTransitionR2()">Moving on →</button>
         </div>
     `;
 }
 
-function showStoryTransition() {
+function showStoryTransitionR2() {
     const page = document.getElementById("firstpage");
 
     page.innerHTML = `
@@ -742,9 +800,10 @@ function showYouMadeMeForget() {
 
             <h3>Anyway, what were we talking about?</h3>
 
-            <button class="diya-next" style="margin-bottom: -5px;" onclick="showThingsWeCallThings()">
+            <button class="diya-next" style="margin-bottom: 8px;" onclick="showThingsWeCallThings()">
                 Next page →
             </button>
+            
         </div>
     `;
 }
