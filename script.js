@@ -884,6 +884,189 @@ function showThingsWeCallThingsPartTwo() {
                 And somehow, that felt<br>
                 like knowing it.
             </p>
+
+            <button class="diya-next" style="margin-bottom: 25px;" onclick="showHeyStranger()">
+                Turn the page →
+            </button>
+
         </div>
     `;
 }
+
+function showHeyStranger() {
+    const page = document.getElementById("firstpage");
+
+    page.innerHTML = `
+        <div class="page-content story-page">
+
+            <p class="page-label">OH, WAIT...</p>
+
+            <p>
+                Oh. Did we become serious here
+                all of a sudden?
+            </p>
+
+            <p>
+                Anyway, I was wondering...
+            </p>
+
+            <p>
+                Who exactly is the person
+                who stumbled upon this book?
+            </p>
+
+            <p>Hey, stranger.</p>
+
+            <p>Or are you someone I know?</p>
+
+            <p>
+                Although, even if I do know you,
+                do I really know you?
+            </p>
+
+            <p>I'm not sure.</p>
+
+            <p>
+                Actually, I'm beginning to think
+                you might not be sure either.
+            </p>
+
+            <p>
+                Look at us. Possibly
+                knowing each other, having an entire
+                conversation without knowing who's who.
+            </p>
+
+            <p>Quite something.</p>
+
+            <button class="diya-next" style="margin-bottom: 25px;" onclick="showAnywayWhoAreYou()">
+                Turn the page →
+            </button>
+
+        </div>
+    `;
+}
+
+
+function showAnywayWhoAreYou() {
+    const page = document.getElementById("firstpage");
+
+    page.innerHTML = `
+        <div class="page-content story-page">
+
+            <p class="page-label">ANYWAY, WHO ARE YOU?...</p>
+
+            <p>
+                It's funny how everyone gets to know
+                a different version of us.
+            </p>
+
+            <p>
+                To some, we're quiet.<br>
+                To some, we're talkative.<br>
+                Someone thinks we're funny.<br>
+                Someone else thinks we're serious.
+            </p>
+
+            <p>
+                We're someone's child, someone's friend,
+                someone's responsibility, someone we're reposible for, someone's favourite person.
+            </p>
+
+            <p>
+                We keep showing up as all these different people.
+            </p>
+
+            <p>
+                And somehow, we know exactly which version
+                to bring into which room.
+            </p>
+
+            <p>
+                It's almost like we've been rehearsing
+                without knowing there's a play.
+            </p>
+
+            <p>
+                But I wonder...
+            </p>
+
+            <p>
+                Do you ever get to meet yourself
+                outside of everyone else's version of you?(with all of your evens and odds?)
+            </p>
+
+            <p>
+                Not the person you're expected to be.<br>
+                Not the person you've learned to be
+                around certain people.
+            </p>
+
+            <p>Just you.</p>
+
+            <p>Anyway.</p>
+
+            <p>I'll leave you with that.</p>
+
+             <button class="diya-next" style="margin-bottom: 25px;" onclick="showTalkAgainPopup()">
+                Where are you going?
+            </button>
+
+        </div>
+    `;
+}
+
+function showTalkAgainPopup() {
+    const page = document.getElementById("firstpage");
+
+    page.insertAdjacentHTML("beforeend", `
+        <div class="talk-popup-overlay" id="talkPopup">
+
+            <div class="talk-popup">
+
+                <p class="page-label">OH, ONE MORE THING...</p>
+
+                <p>
+                    To bring more gossips again soon.
+                </p>
+
+                <p>
+                    Obviously, I'll be the one talking.
+                </p>
+
+                <div class="talk-popup-actions">
+                    <button onclick="goBack()">
+                        Close the book
+                    </button>
+
+                    <button onclick="closeTalkPopup()">
+                        Stay a little longer
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    `);
+}
+
+function closeTalkPopup() {
+    const popup = document.getElementById("talkPopup");
+
+    if (popup) {
+        popup.remove();
+    }
+
+    // Remove any saved copies of the popup from page history
+    for (let i = 0; i < pageHistory.length; i++) {
+        const temp = document.createElement("div");
+        temp.innerHTML = pageHistory[i];
+
+        const savedPopup = temp.querySelector("#talkPopup");
+
+        if (savedPopup) {
+            savedPopup.remove();
+            pageHistory[i] = temp.innerHTML;
+        }
+    }
+}
+

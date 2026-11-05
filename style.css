@@ -448,6 +448,53 @@ button:hover {
     }
 }
 
+.talk-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.talk-popup {
+    background: #f5efe6;
+    color: #29251f;
+    padding: 30px 25px;
+    width: 80%;
+    max-width: 320px;
+    text-align: center;
+    border-radius: 4px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
+
+.talk-popup-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 25px;
+}
+
+.talk-popup-actions button {
+    background: none;
+    border: none;
+    color: #782478;
+    font-family: Georgia, serif;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.talk-again {
+    background: none;
+    border: none;
+    color: #d9b77b;
+    font-family: Georgia, serif;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 0;
+}
+
 @media (max-width: 600px) {
     .book {
         width: calc(100vw - 32px);
