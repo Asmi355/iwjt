@@ -1,6 +1,50 @@
 const originalPage = document.getElementById("firstpage").innerHTML;
+document.getElementById("firstpage").dataset.page = "start";
 
 const pageHistory = [];
+
+const pageRenderers = {
+    "start": () => {
+        const page = document.getElementById("firstpage");
+        page.innerHTML = originalPage;
+        page.dataset.page = "start";
+    },
+
+    "response": showResponse,
+    "first-thought": showFirstThought,
+    "unexpected": showUnexpected,
+    "leaving": showLeaving,
+    "staying": showStaying,
+    "kindness-intro": showKindnessIntro,
+    "kindness-next": showKindnessNext,
+    "frog-leaves": showFrogLeaves,
+    "frog-gone": showFrogGone,
+    "frog-aftermath": showFrogAfterthought,
+    "diya-moment": showDiyaMoment,
+    "absurd-law": showAbsurdLaw,
+    "law-input": showLawInput,
+    "law-submitted": showLawSubmitted,
+    "law-pass": showLawPass,
+    "story-transition-r2": showStoryTransitionR2,
+    "fine-girl-story": showFineGirlStory,
+    "fine-girl-ending": showFineGirlEnding,
+    "fine-girl-finale": showFineGirlFinale,
+    "story-transition": showStoryTransition,
+    "you-made-me-forget": showYouMadeMeForget,
+    "things-we-call-things": showThingsWeCallThings,
+    "things-part-two": showThingsWeCallThingsPartTwo,
+    "hey-stranger": showHeyStranger,
+    "anyway-who-are-you": showAnywayWhoAreYou
+};
+
+function renderPage(pageId) {
+    const renderer = pageRenderers[pageId];
+
+    if (!renderer) return;
+
+    renderer();
+    addPreviousButton();
+}
 
 function addPreviousButton() {
     const page = document.getElementById("firstpage");
@@ -27,76 +71,71 @@ function addPreviousButton() {
 function goToPreviousPage() {
     if (pageHistory.length === 0) return;
 
-    const page = document.getElementById("firstpage");
+    if (frogTransitionTimer) {
+       clearTimeout(frogTransitionTimer);
+       frogTransitionTimer = null;
+       replayingFrogPage = false;
+    }
 
-    page.innerHTML = pageHistory.pop();
+    const previousPageId = pageHistory.pop();
 
-    addPreviousButton();
+    if (previousPageId === "frog-leaves") {
+       replayingFrogPage = true;
+    }
+
+    renderPage(previousPageId);
+    saveReadingProgress();
 }
 
 //continuity progress
 
 const readingKey = "iwjt-reading-progress";
+let savedLawAnswer = "";
+let frogTransitionTimer;
+let replayingFrogPage = false;
 
 function saveReadingProgress() {
     const page = document.getElementById("firstpage");
-    const snapshot = page.cloneNode(true);
 
-    const previous = snapshot.querySelector("#previousPage");
-    if (previous) previous.remove();
+    const formValues = {};
 
-    snapshot.querySelectorAll("textarea").forEach((field, i) => {
-        field.textContent = page.querySelectorAll("textarea")[i]?.value || "";
-    });
-
-    snapshot.querySelectorAll("input").forEach((field, i) => {
-        field.setAttribute(
-            "value",
-            page.querySelectorAll("input")[i]?.value || ""
-        );
+    page.querySelectorAll("input, textarea, select").forEach(field => {
+        if (field.id) {
+            formValues[field.id] = field.value;
+        }
     });
 
     localStorage.setItem(readingKey, JSON.stringify({
-        pageHTML: snapshot.innerHTML,
-        history: pageHistory
+        pageId: page.dataset.page,
+        history: pageHistory,
+        formValues: formValues,
+        savedLawAnswer: savedLawAnswer
     }));
 }
 
 function clearReadingProgress() {
     localStorage.removeItem(readingKey);
     pageHistory.length = 0;
+    savedLawAnswer = "";
 }
 
-
 // Save the page before its buttons change it.
+// Save the current page ID before navigating.
 document.addEventListener("click", function (event) {
     const page = document.getElementById("firstpage");
     const button = event.target.closest("#firstpage button");
 
-    if (!button || button.id === "previousPage") return;
+    if (
+      !button ||
+      button.id === "previousPage" ||
+      button.closest("#talkPopup") ||
+      button.getAttribute("onclick") === "showTalkAgainPopup()"
+    ) return;
+    const currentPageId = page.dataset.page;
 
-    const snapshot = page.cloneNode(true);
-
-    // Don't save the Previous button as part of the page.
-    const oldButton = snapshot.querySelector("#previousPage");
-    if (oldButton) oldButton.remove();
-
-    // Preserve anything the reader has typed.
-    snapshot.querySelectorAll("textarea").forEach((field, index) => {
-        const originalFields = page.querySelectorAll("textarea");
-        if (originalFields[index]) {
-            field.textContent = originalFields[index].value;
-        }
-    });
-
-    snapshot.querySelectorAll("input").forEach((field, index) => {
-        const originalFields = page.querySelectorAll("input");
-        if (originalFields[index]) {
-            field.setAttribute("value", originalFields[index].value);
-        }
-    });
-
-    pageHistory.push(snapshot.innerHTML);
+    if (currentPageId) {
+        pageHistory.push(currentPageId);
+    }
 }, true);
 
 // Show Previous whenever a new page appears.
@@ -112,6 +151,20 @@ pageObserver.observe(document.getElementById("firstpage"), {
     childList: true
 });
 
+document.addEventListener("input", function (event) {
+    const field = event.target.closest("#firstpage input, #firstpage textarea, #firstpage select");
+
+    if (!field) return;
+
+    if (field.id === "lawAnswer") {
+        savedLawAnswer = field.value;
+    }
+
+    if (document.getElementById("book").classList.contains("is-open")) {
+        saveReadingProgress();
+    }
+});
+
 
 function entertheworld() {
     const book = document.getElementById("book");
@@ -121,19 +174,36 @@ function entertheworld() {
     const saved = localStorage.getItem(readingKey);
 
     if (saved) {
-        const resume = confirm(
-            "Welcome back! Would you like to continue where you left off?\n\nOK = Continue reading\nCancel = Start from the beginning"
-        );
+        const progress = JSON.parse(saved);
 
-        if (resume) {
-            const progress = JSON.parse(saved);
-            page.innerHTML = progress.pageHTML;
-            pageHistory.length = 0;
-            pageHistory.push(...progress.history);
+        if (progress.pageId) {
+            const resume = confirm(
+                "Welcome back! Would you like to continue where you left off?\n\nOK = Continue reading\nCancel = Start from the beginning"
+            );
+
+            if (resume) {
+                pageHistory.length = 0;
+                pageHistory.push(...(progress.history || []));
+
+                savedLawAnswer = progress.savedLawAnswer || "";
+                replayingFrogPage = false;
+                renderPage(progress.pageId);
+
+                Object.entries(progress.formValues || {}).forEach(([id, value]) => {
+                    const field = document.getElementById(id);
+                    if (field) field.value = value;
+                });
+            } else {
+                clearReadingProgress();
+                renderPage("start");
+            }
         } else {
             clearReadingProgress();
-            page.innerHTML = originalPage;
+            renderPage("start");
         }
+    } else {
+        pageHistory.length = 0;
+        renderPage("start");
     }
 
     book.classList.add("is-open");
@@ -152,7 +222,16 @@ function goBack() {
     const cover = document.getElementById("bookCover");
     const page = document.getElementById("firstpage");
 
+    if (frogTransitionTimer) {
+      clearTimeout(frogTransitionTimer);
+      frogTransitionTimer = null;
+    }
+
+    replayingFrogPage = false;
+
     page.innerHTML = originalPage;
+    page.dataset.page = "start";
+    pageHistory.length = 0;
 
     cover.style.transform = "rotateY(0deg)";
     book.classList.remove("is-open");
@@ -160,6 +239,8 @@ function goBack() {
 
 function showResponse() {
     const page = document.getElementById("firstpage");
+
+    page.dataset.page = "response";
 
     page.innerHTML = `
         <p class="page-label">OH, HELLO AGAIN</p>
@@ -176,6 +257,8 @@ function showResponse() {
 
 function showFirstThought() {
     const page = document.getElementById("firstpage");
+
+    page.dataset.page = "first-thought";
 
     page.innerHTML = `
         <p class="page-label">A THOUGHT THAT ESCAPED</p>
@@ -210,6 +293,8 @@ function showFirstThought() {
 function showUnexpected() {
     const page = document.getElementById("firstpage");
 
+    page.dataset.page = "unexpected";
+
     page.innerHTML = `
         <p class="page-label">CONGRATULATIONS</p>
 
@@ -235,6 +320,8 @@ function showUnexpected() {
 
 function showLeaving() {
     const page = document.getElementById("firstpage");
+
+    page.dataset.page = "leaving";
 
     page.innerHTML = `
     <p class="page-label">WAIT A MINUTE</p>
@@ -265,6 +352,8 @@ function showLeaving() {
 
 function showStaying() {
     const page = document.getElementById("firstpage");
+
+    page.dataset.page = "staying";
 
     page.innerHTML = `
         <p class="page-label">OH, REALLY?</p>
@@ -304,6 +393,8 @@ function showStaying() {
 function showKindnessIntro() {
     const page = document.getElementById("firstpage");
 
+    page.dataset.page = "kindness-intro";
+
     page.innerHTML = `
         <p class="page-label">ANYWAY...</p>
 
@@ -335,6 +426,8 @@ function showKindnessIntro() {
 function showKindnessNext() {
     const page = document.getElementById("firstpage");
 
+    page.dataset.page = "kindness-next";
+
     page.innerHTML = `
         <p class="page-label">AN UNRELATED DEVELOPMENT</p>
 
@@ -364,6 +457,8 @@ function showKindnessNext() {
 
 function showFrogLeaves() {
     const page = document.getElementById("firstpage");
+
+    page.dataset.page = "frog-leaves";
 
     page.innerHTML = `
         <p class="page-label">POND DEPARTMENT</p>
@@ -436,26 +531,43 @@ function showFrogLeaves() {
         </div>
     `;
 
-    setTimeout(() => {
-        page.innerHTML = `
-            <p class="page-label">POND DEPARTMENT</p>
+    frogTransitionTimer = setTimeout(() => {
+        if (!replayingFrogPage) {
+          pageHistory.push("frog-leaves");
+        }
 
-            <div class="page-content">
-                <h1>He's gone.</h1>
-                <p>You let him go.</p>
-                <p>He hopped away without saying goodbye.</p>
-                <p>Honestly, a little rude.</p>
-                <p>But we respect his decision.</p>
-                <h2>🐸 · · ·</h2>
-                <p><em>Three tiny dots. That's all he left behind.</em></p>
-                <button onclick="showFrogAfterthought()">Let's move.</button>
-            </div>
-        `;
+        replayingFrogPage = false;
+
+        showFrogGone();
+        saveReadingProgress();
     }, 3500);
+}
+
+function showFrogGone() {
+    const page = document.getElementById("firstpage");
+
+    page.dataset.page = "frog-gone";
+
+    page.innerHTML = `
+        <p class="page-label">POND DEPARTMENT</p>
+
+        <div class="page-content">
+            <h1>He's gone.</h1>
+            <p>You let him go.</p>
+            <p>He hopped away without saying goodbye.</p>
+            <p>Honestly, a little rude.</p>
+            <p>But we respect his decision.</p>
+            <h2>🐸 · · ·</h2>
+            <p><em>Three tiny dots. That's all he left behind.</em></p>
+            <button onclick="showFrogAfterthought()">Let's move.</button>
+        </div>
+    `;
 }
 
 function showFrogAfterthought() {
     const page = document.getElementById("firstpage");
+
+    page.dataset.page = "frog-aftermath";
 
     page.innerHTML = `
         <p class="page-label">RIGHT. WHERE WERE WE?</p>
@@ -478,6 +590,8 @@ function showFrogAfterthought() {
 
 function showDiyaMoment() {
     const page = document.getElementById("firstpage");
+
+    page.dataset.page = "diya-moment";
 
     page.innerHTML = `
         <div class="diya-page">
@@ -516,6 +630,8 @@ function showDiyaMoment() {
 function showAbsurdLaw() {
     const page = document.getElementById("firstpage");
 
+    page.dataset.page = "absurd-law";
+
     page.innerHTML = `
         <div class="page-content">
             <p class="page-label">ONE VERY IMPORTANT, VERY UNIMPORTANT QUESTION.</p>
@@ -536,6 +652,8 @@ function showAbsurdLaw() {
 function showLawInput() {
     const page = document.getElementById("firstpage");
 
+    page.dataset.page = "law-input";
+
     page.innerHTML = `
         <div class="page-content">
             <p class="page-label">YOUR LAW, YOUR HIGHNESS.</p>
@@ -551,11 +669,29 @@ function showLawInput() {
             <button onclick="submitLaw()">Submit your law</button>
         </div>
     `;
+
+    document.getElementById("lawAnswer").value = savedLawAnswer;
+}
+
+function showLawSubmitted() {
+    const page = document.getElementById("firstpage");
+
+    page.dataset.page = "law-submitted";
+
+    page.innerHTML = `
+        <div class="page-content">
+            <p class="page-label">LAW RECEIVED.</p>
+            <h2>Your law has been submitted. The world has been notified.</h2>
+            <p>Well, at least this corner of it.</p>
+            <button onclick="showStoryTransition()">And now... →</button>
+        </div>
+    `;
 }
 
 async function submitLaw() {
     const answerBox = document.getElementById("lawAnswer");
     const answer = answerBox.value.trim();
+    savedLawAnswer = answer;
 
     if (!answer) {
         alert("Your law is still a secret. Write something first!");
@@ -577,14 +713,7 @@ async function submitLaw() {
         });
 
         if (response.ok) {
-            document.getElementById("firstpage").innerHTML = `
-                <div class="page-content">
-                    <p class="page-label">LAW RECEIVED.</p>
-                    <h2>Your law has been submitted. The world has been notified.</h2>
-                    <p>Well, at least this corner of it.</p>
-                    <button onclick="showStoryTransition()">And now... →</button>
-                </div>
-            `;
+            showLawSubmitted();
         } else {
             alert("Your law couldn't be sent. Please try again.");
         }
@@ -595,6 +724,8 @@ async function submitLaw() {
 
 function showLawPass() {
     const page = document.getElementById("firstpage");
+
+    page.dataset.page = "law-pass";
 
     page.innerHTML = `
         <div class="page-content">
@@ -613,6 +744,8 @@ function showLawPass() {
 
 function showStoryTransitionR2() {
     const page = document.getElementById("firstpage");
+
+    page.dataset.page = "story-transition-r2";
 
     page.innerHTML = `
         <div class="page-content">
@@ -633,6 +766,8 @@ function showStoryTransitionR2() {
 
 function showFineGirlStory() {
     const page = document.getElementById("firstpage");
+
+    page.dataset.page = "fine-girl-story";
 
     page.innerHTML = `
         <div class="page-content story-page" >
@@ -675,6 +810,8 @@ function showFineGirlStory() {
 function showFineGirlEnding() {
     const page = document.getElementById("firstpage");
 
+    page.dataset.page = "fine-girl-ending";
+
     page.innerHTML = `
         <div class="page-content story-page">
             <p class="page-label">THE NEXT MORNING</p>
@@ -708,6 +845,8 @@ function showFineGirlEnding() {
 
 function showFineGirlFinale() {
     const page = document.getElementById("firstpage");
+
+    page.dataset.page = "fine-girl-finale";
 
     page.innerHTML = `
         <div class="page-content story-page">
@@ -750,6 +889,8 @@ function showFineGirlFinale() {
 function showStoryTransition() {
     const page = document.getElementById("firstpage");
 
+    page.dataset.page = "story-transition";
+
     page.innerHTML = `
         <div class="page-content">
             <p class="page-label">SOMETHING FOR YOU</p>
@@ -763,6 +904,8 @@ function showStoryTransition() {
 
 function showYouMadeMeForget() {
     const page = document.getElementById("firstpage");
+
+    page.dataset.page = "you-made-me-forget";
 
     page.innerHTML = `
         <div class="page-content story-page forget-page">
@@ -811,6 +954,8 @@ function showYouMadeMeForget() {
 function showThingsWeCallThings() {
     const page = document.getElementById("firstpage");
 
+    page.dataset.page = "things-we-call-things";
+
     page.innerHTML = `
         <div class="page-content story-page things-page">
             <p class="page-label">A LITTLE OBSERVATION.</p>
@@ -856,6 +1001,8 @@ function showThingsWeCallThings() {
 function showThingsWeCallThingsPartTwo() {
     const page = document.getElementById("firstpage");
 
+    page.dataset.page = "things-part-two";
+
     page.innerHTML = `
         <div class="page-content story-page things-page">
             <p class="page-label">AND THEN...</p>
@@ -895,6 +1042,8 @@ function showThingsWeCallThingsPartTwo() {
 
 function showHeyStranger() {
     const page = document.getElementById("firstpage");
+
+    page.dataset.page = "hey-stranger";
 
     page.innerHTML = `
         <div class="page-content story-page">
@@ -951,6 +1100,8 @@ function showHeyStranger() {
 function showAnywayWhoAreYou() {
     const page = document.getElementById("firstpage");
 
+    page.dataset.page = "anyway-who-are-you";
+
     page.innerHTML = `
         <div class="page-content story-page">
 
@@ -1006,7 +1157,7 @@ function showAnywayWhoAreYou() {
 
             <p>Anyway.</p>
 
-            <p>I'll leave you with that.</p>
+            <p>I'll leave you with that...</p>
 
              <button class="diya-next" style="margin-bottom: 25px;" onclick="showTalkAgainPopup()">
                 Where are you going?
@@ -1054,19 +1205,6 @@ function closeTalkPopup() {
 
     if (popup) {
         popup.remove();
-    }
-
-    // Remove any saved copies of the popup from page history
-    for (let i = 0; i < pageHistory.length; i++) {
-        const temp = document.createElement("div");
-        temp.innerHTML = pageHistory[i];
-
-        const savedPopup = temp.querySelector("#talkPopup");
-
-        if (savedPopup) {
-            savedPopup.remove();
-            pageHistory[i] = temp.innerHTML;
-        }
     }
 }
 
