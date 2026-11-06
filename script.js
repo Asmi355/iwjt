@@ -970,7 +970,7 @@ function showAnywayWhoAreYou() {
 
             <p>
                 We're someone's child, someone's friend,
-                someone's responsibility, someone we're reposible for, someone's favourite person.
+                someone's responsibility, someone we're reponsible for, someone's favourite person.
             </p>
 
             <p>
